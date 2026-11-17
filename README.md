@@ -26,7 +26,7 @@ so after a reboot it rejoins by itself.
 
 | 1 · Find the board | 2 · Send Wi-Fi | 3 · Live camera | 4 · Motors |
 |---|---|---|---|
-| ![Guide screen scanning for the ESP32 over Bluetooth](docs/images/guide.png) | ![Wi-Fi name and password form](docs/images/wifi_setup.png) | ![Live thermal camera with a hot object boxed](docs/images/overview.png) | ![Auto mode, left motor vibrating](docs/images/motors_auto.png) |
+| ![Guide screen scanning for the ESP32 over Bluetooth](docs/images/guide.png) | ![Dialog asking for the Wi-Fi name and password](docs/images/wifi_setup.png) | ![Live thermal camera with a hot object boxed](docs/images/overview.png) | ![Auto mode, left motor vibrating](docs/images/motors_auto.png) |
 
 <sub>Material 3 Expressive UI on a Pixel 10 (emulator). Captured by the instrumented tests (<code>./gradlew :app:connectedDebugAndroidTest</code>); screens 3–4 run against the simulated ESP32, so the address reads <code>localhost</code>.</sub>
 
@@ -112,12 +112,12 @@ all still work, and the app shows "MLX90640 not found".
 ## App
 
 Open the project in Android Studio and run `app` (minSdk 35). On first launch, grant **Nearby devices**
-and **Local network**. The app finds the board by itself. On the dashboard, enter your Wi-Fi details once.
+and **Local network**. The app finds the board by itself. When the board isn't on Wi-Fi yet, a dialog asks for your network name and password.
 The board saves them and rejoins after a reboot.
 
 | Card | What it does |
 |---|---|
-| Connection | Wi-Fi/IP, link status and FPS; send or change Wi-Fi credentials |
+| Connection | Wi-Fi/IP, link status and FPS; opens the Wi-Fi dialog (pops up by itself when the board is offline) |
 | Thermal camera | Live image, hot-object boxes, min/center/max; mirror, smoothing, °F |
 | Push button | Pressed/released live, presses this session, recent presses with hold time |
 | Vibration motors | Auto (camera) / Manual mode, Stop |
@@ -165,5 +165,5 @@ The end-to-end suite runs the real dashboard and WebSocket client against `FakeE
 (`app/src/androidTest/.../fake/FakeEsp32.kt`). The fake speaks the firmware's protocol and copies its
 motor/button logic. It covers the camera stream, hot object → matching motor, the trigger slider, the enable
 switch, test buzz, Manual mode, button presses, the LED, reconnecting after a drop, a missing camera, and the
-Wi-Fi form. **Not covered:** BLE pairing and the real hardware. Check those by hand with the board. If you change
+Wi-Fi dialog (auto-open, Later/reopen, failed join). **Not covered:** BLE pairing and the real hardware. Check those by hand with the board. If you change
 the protocol, update the firmware, `device/Protocol.kt` and `FakeEsp32` together.

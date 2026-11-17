@@ -9,6 +9,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -20,6 +21,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.eliaschen.espapguider.ble.WifiStatus
@@ -228,15 +230,32 @@ class DashboardE2ETest {
         waitFor("test buzz works without the camera") { text("duty-left") == "100" }
     }
 
-    @Test fun wifiFormSendsCredentials() {
+    @Test fun wifiDialogPopsUpAndSendsCredentials() {
         var sent: Pair<String, String>? = null
         launch(WifiStatus.Disconnected) { s, p -> sent = s to p }
+        // The dialog opens by itself when the ESP32 isn't on Wi-Fi.
+        rule.onNodeWithText("Connect the ESP32 to Wi-Fi").assertIsDisplayed()
         rule.onNodeWithText("Wi-Fi name").performTextInput("lab-wifi")
         rule.onNodeWithText("Password").performTextInput("s3cret")
-        rule.waitForIdle()
-        screenshot("wifi_setup")
-        rule.onNodeWithText("Send to ESP32").performClick()
+        Espresso.closeSoftKeyboard()          // keep the README shot about the dialog
+        saveScreenshot(rule, "wifi_setup", fullScreen = true)
+        rule.onNodeWithText("Connect").performClick()
         rule.waitForIdle()
         assertEquals("lab-wifi" to "s3cret", sent)
+        rule.onNodeWithText("Connect the ESP32 to Wi-Fi").assertDoesNotExist()
+    }
+
+    @Test fun wifiDialogCanBePostponedAndReopened() {
+        launch(WifiStatus.Disconnected)
+        rule.onNodeWithText("Later").performClick()
+        rule.onNodeWithText("Connect the ESP32 to Wi-Fi").assertDoesNotExist()
+        node("open-wifi").performClick()
+        rule.onNodeWithText("Connect the ESP32 to Wi-Fi").assertIsDisplayed()
+        rule.onNodeWithText("Connect").assertIsNotEnabled()   // needs a network name first
+    }
+
+    @Test fun failedJoinExplainsWhy() {
+        launch(WifiStatus.Failed)
+        rule.onNodeWithText("couldn't join", substring = true).assertIsDisplayed()
     }
 }
