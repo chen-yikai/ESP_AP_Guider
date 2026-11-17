@@ -8,22 +8,23 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import dev.eliaschen.espapguider.ble.BLTService
+import dev.eliaschen.espapguider.ble.LocalBLT
+import dev.eliaschen.espapguider.ui.dashboard.Dashboard
+import dev.eliaschen.espapguider.ui.guider.Guider
 import dev.eliaschen.espapguider.ui.theme.ESPAPGuiderTheme
-import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 
-val LocalBLT = compositionLocalOf<BLTService> { error("BLTService not provided") }
+private const val LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +35,8 @@ class MainActivity : ComponentActivity() {
             ESPAPGuiderTheme {
                 val permissionsLauncher =
                     rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-                        if (result.values.all { it }) {
+                        // Local network access only matters for the Wi-Fi stream; BLE works without it.
+                        if (result.filterKeys { it != LOCAL_NETWORK }.values.all { it }) {
                             bluetoothService.startListening()
                         }
                     }
@@ -45,7 +47,8 @@ class MainActivity : ComponentActivity() {
                     permissionsLauncher.launch(
                         arrayOf(
                             android.Manifest.permission.BLUETOOTH_SCAN,
-                            android.Manifest.permission.BLUETOOTH_CONNECT
+                            android.Manifest.permission.BLUETOOTH_CONNECT,
+                            LOCAL_NETWORK,
                         )
                     )
                     onDispose {

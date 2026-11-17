@@ -1,9 +1,7 @@
-package dev.eliaschen.espapguider
+package dev.eliaschen.espapguider.ui.guider
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothProfile
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,17 +20,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import dev.eliaschen.espapguider.ble.BLTService
+import dev.eliaschen.espapguider.ble.LocalBLT
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
