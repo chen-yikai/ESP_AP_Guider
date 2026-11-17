@@ -120,8 +120,13 @@ class FakeEsp32 {
         val t = FloatArray(IR_N) { 25f + (it % 7) * 0.1f }   // room temperature with a little texture
         val side = hotSide ?: return t
         // Firmware: raw left half -> motor (rawLeft != MIRROR_VIEW ? 0 : 1), i.e. raw right half = left motor.
-        val x0 = if ((side == 0) == mirrorView) IR_W / 2 + 3 else 3
-        for (y in 8 until 16) for (x in x0 until x0 + 8) t[y * IR_W + x] = hotTempC
+        // A round heat blob (like a mug or a hand): hotTempC at the center, fading to the room.
+        val cx = if ((side == 0) == mirrorView) IR_W * 3 / 4f else IR_W / 4f
+        val cy = IR_H / 2f
+        for (y in 0 until IR_H) for (x in 0 until IR_W) {
+            val d2 = (x - cx) * (x - cx) + (y - cy) * (y - cy)
+            t[y * IR_W + x] += (hotTempC - 25f) * kotlin.math.exp(-d2 / 12f)
+        }
         return t
     }
 

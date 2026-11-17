@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
@@ -91,6 +92,17 @@ class DashboardE2ETest {
     private fun setSlider(tag: String, value: Float) =
         node(tag).performSemanticsAction(SemanticsActions.SetProgress) { it(value) }
 
+    /** Scrolls [tag] into view with its card header clear of the top app bar, then takes a screenshot. */
+    private fun screenshotAt(tag: String, name: String) {
+        node(tag)
+        val back = with(rule.density) { 96.dp.toPx() }
+        runCatching {
+            rule.onNodeWithTag("dashboard").performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, -back) }
+        }
+        rule.waitForIdle()
+        screenshot(name)
+    }
+
     private fun screenshot(name: String) {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val dir = File(ctx.getExternalFilesDir(null), "e2e").apply { mkdirs() }
@@ -116,12 +128,13 @@ class DashboardE2ETest {
         assertEquals("right motor stays idle", "0", text("duty-right"))
         assertTrue("left half sees hot pixels", text("hot-left").toInt() > 0)
         rule.onNodeWithText("Vibrating").assertIsDisplayed()
-        node("thermal-image")          // scroll the camera view into the shot
-        screenshot("01_hot_left")
+        waitFor("FPS counter") { !text("link").contains(" 0.0 FPS") }
+        screenshotAt("link", "overview")            // connection + camera
+        screenshotAt("mode-auto", "motors_auto")
 
         esp.hotSide = 1
         waitFor("right motor to take over") { text("duty-right") != "0" && text("duty-left") == "0" }
-        screenshot("02_hot_right")
+        screenshotAt("link", "camera_hot_right")
 
         esp.hotSide = null
         waitFor("both motors to stop") { text("duty-left") == "0" && text("duty-right") == "0" }
@@ -168,7 +181,7 @@ class DashboardE2ETest {
         esp.hotSide = 1                        // camera must not override manual control
         Thread.sleep(300)
         assertEquals("0", text("duty-right"))
-        screenshot("03_manual")
+        screenshotAt("mode-manual", "motors_manual")
 
         rule.onNodeWithText("Stop").performClick()
         waitFor("Stop to zero the motors") { text("duty-left") == "0" }
@@ -185,7 +198,7 @@ class DashboardE2ETest {
 
         esp.pressButton()
         waitFor("button to show pressed") { text("button-state") == "ON" }
-        screenshot("04_button_pressed")
+        screenshotAt("button-count", "button_pressed")
         Thread.sleep(250)
         esp.releaseButton()
         waitFor("button to show released") { text("button-state") == "OFF" }

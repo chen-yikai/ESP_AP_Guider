@@ -72,7 +72,7 @@ internal fun ButtonCard(pressed: Boolean?, count: Int?) {
     DashCard(
         title = "Push button",
         subtitle = "GPIO 6 on the ESP32",
-        trailing = { Pill(if (count == null) "No data" else "$sessionPresses presses", modifier = Modifier.testTag("button-count")) }
+        trailing = { Pill(if (count == null) "No data" else if (sessionPresses == 1) "1 press" else "$sessionPresses presses", modifier = Modifier.testTag("button-count")) }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Box(

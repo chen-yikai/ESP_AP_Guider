@@ -22,6 +22,14 @@ so after a reboot it rejoins by itself.
  └───────────────────────────────────────┘          └───────────────────────────────────┘
 ```
 
+## Screenshots
+
+| Live camera | Auto: hot object → left motor | Manual control | Button input |
+|---|---|---|---|
+| ![Connection and live thermal camera](docs/images/overview.png) | ![Motors in Auto mode, left motor vibrating](docs/images/motors_auto.png) | ![Manual mode with per-motor sliders](docs/images/motors_manual.png) | ![Push button pressed](docs/images/button_pressed.png) |
+
+<sub>Captured by the end-to-end tests (`./gradlew :app:connectedDebugAndroidTest`) against the simulated ESP32, so the address reads <code>localhost</code>.</sub>
+
 ## Wire list
 
 Board: **ESP32-S3 DevKit (N16R8)**, powered over USB-C.

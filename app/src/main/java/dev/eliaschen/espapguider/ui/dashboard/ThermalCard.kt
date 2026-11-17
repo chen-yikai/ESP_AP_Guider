@@ -157,8 +157,16 @@ internal fun ThermalImage(frame: ThermalFrame, lo: Float, hi: Float, options: Vi
             )
             val half = size.width / 2
             // Vibrating halves glow red.
-            if (leftGlow > 0f) drawRect(Vibrating.copy(alpha = 0.25f * leftGlow), size = Size(half, size.height))
-            if (rightGlow > 0f) drawRect(Vibrating.copy(alpha = 0.25f * rightGlow), Offset(half, 0f), Size(half, size.height))
+            // Vibrating halves get a red outline and a faint tint (a heavy tint would wash out the palette).
+            val edge = 3.dp.toPx()
+            listOf(0f to leftGlow, half to rightGlow).forEach { (x, glow) ->
+                if (glow <= 0f) return@forEach
+                drawRect(Vibrating.copy(alpha = 0.08f * glow), Offset(x, 0f), Size(half, size.height))
+                drawRect(
+                    Vibrating.copy(alpha = glow), Offset(x + edge / 2, edge / 2), Size(half - edge, size.height - edge),
+                    style = Stroke(edge)
+                )
+            }
             drawLine(
                 Color.White.copy(alpha = 0.4f), Offset(half, 0f), Offset(half, size.height),
                 strokeWidth = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 10f))
