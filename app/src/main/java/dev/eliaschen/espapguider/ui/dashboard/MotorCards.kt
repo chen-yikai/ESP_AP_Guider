@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package dev.eliaschen.espapguider.ui.dashboard
 
 import android.os.SystemClock
@@ -12,16 +14,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,7 +42,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.eliaschen.espapguider.device.MotorMode
 import dev.eliaschen.espapguider.device.MotorState
@@ -66,11 +77,13 @@ internal fun MotorCard(
     val tag = name.lowercase()
     Card(
         modifier = modifier.testTag("motor-$tag"),
-        border = if (vibrating) BorderStroke(1.5.dp, Vibrating) else null,
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        border = if (vibrating) BorderStroke(2.dp, Vibrating) else null,
     ) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(48.dp)) {
-                Text("$name motor", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                Text("$name motor", style = MaterialTheme.typography.titleSmallEmphasized, modifier = Modifier.weight(1f))
                 // The enable switch gates the camera trigger; in manual mode the phone is in charge.
                 if (!manual) Switch(
                     checked = enabled,
@@ -98,20 +111,29 @@ internal fun MotorCard(
                 Text(
                     "${motor?.percent ?: 0}",
                     modifier = Modifier.testTag("duty-$tag"),
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.displayMediumEmphasized,
                 )
                 Text("%", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 2.dp, bottom = 6.dp))
             }
-            LinearProgressIndicator(
+            // Wavy while the motor runs — it reads as "buzzing" at a glance.
+            if (vibrating) LinearWavyProgressIndicator(
                 progress = { progress },
-                color = if (vibrating) Vibrating else MaterialTheme.colorScheme.primary,
+                color = Vibrating,
+                trackColor = Vibrating.copy(alpha = 0.2f),
+                modifier = Modifier.fillMaxWidth()
+            ) else LinearProgressIndicator(
+                progress = { progress },
                 modifier = Modifier.fillMaxWidth()
             )
             if (manual) ManualDutySlider(motor?.duty, onManualDuty, Modifier.testTag("manual-$tag"))
             KeyValue("Peak", motor?.peakC?.takeIf { it > -200 && it != 0f }?.let(options::fmt) ?: "--")
             KeyValue("Hot pixels", motor?.hotPixels?.toString() ?: "--", Modifier.testTag("hot-$tag"))
-            OutlinedButton(onClick = onTest, enabled = motor != null, modifier = Modifier.fillMaxWidth().testTag("test-$tag")) {
+            OutlinedButton(
+                onClick = onTest,
+                enabled = motor != null,
+                shapes = ButtonDefaults.shapes(),
+                modifier = Modifier.fillMaxWidth().testTag("test-$tag")
+            ) {
                 Text("Test buzz")
             }
         }
@@ -155,20 +177,39 @@ internal fun MotorModeCard(mode: MotorMode?, onMode: (MotorMode) -> Unit, onStop
         }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            SingleChoiceSegmentedButtonRow(Modifier.weight(1f)) {
+            // Expressive connected button group: the selected item morphs to a pill.
+            Row(
+                Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+            ) {
                 MotorMode.entries.forEachIndexed { i, m ->
-                    SegmentedButton(
-                        modifier = Modifier.testTag("mode-${m.name.lowercase()}"),
-                        selected = mode == m,
+                    val checked = mode == m
+                    ToggleButton(
+                        checked = checked,
                         enabled = mode != null,
-                        onClick = { onMode(m) },
-                        shape = SegmentedButtonDefaults.itemShape(i, MotorMode.entries.size),
-                    ) { Text(if (m == MotorMode.Auto) "Auto (camera)" else "Manual") }
+                        onCheckedChange = { onMode(m) },
+                        shapes = if (i == 0) ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        else ButtonGroupDefaults.connectedTrailingButtonShapes(),
+                        // Unselected needs its own fill; the card is surfaceContainer too.
+                        colors = ToggleButtonDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics { role = Role.RadioButton }
+                            .testTag("mode-${m.name.lowercase()}"),
+                    ) {
+                        if (checked) {
+                            Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(ToggleButtonDefaults.IconSize))
+                            Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
+                        }
+                        Text(if (m == MotorMode.Auto) "Auto" else "Manual")
+                    }
                 }
             }
             if (mode == MotorMode.Manual) {
                 Spacer(Modifier.width(8.dp))
-                OutlinedButton(onClick = onStopAll) { Text("Stop") }
+                FilledTonalButton(onClick = onStopAll, shapes = ButtonDefaults.shapes()) { Text("Stop") }
             }
         }
     }
@@ -200,7 +241,7 @@ internal fun TriggerCard(deviceTrigger: Float?, options: ViewOptions, onTrigger:
             if (deviceTrigger != null) Pill(if (saved) "Saved" else "Saving…")
         }
     ) {
-        Text(options.fmt(value), style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
+        Text(options.fmt(value), style = MaterialTheme.typography.displaySmallEmphasized)
         Slider(
             value = value,
             modifier = Modifier.testTag("trigger"),

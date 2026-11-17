@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package dev.eliaschen.espapguider.ui.dashboard
 
 import android.os.SystemClock
@@ -7,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -29,7 +32,11 @@ internal fun LedCard(deviceLed: Boolean?, onLed: (Boolean) -> Unit) {
     LaunchedEffect(deviceLed) {
         if (deviceLed != null && SystemClock.elapsedRealtime() - editedAt > EDIT_HOLD_MS) ledState = deviceLed
     }
-    Card(modifier = Modifier.padding(horizontal = 12.dp)) {
+    Card(
+        modifier = Modifier.padding(horizontal = 12.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -38,7 +45,7 @@ internal fun LedCard(deviceLed: Boolean?, onLed: (Boolean) -> Unit) {
                 .fillMaxWidth()
         ) {
             Column {
-                Text("Onboard LED", style = MaterialTheme.typography.titleMedium)
+                Text("Onboard LED", style = MaterialTheme.typography.titleMediumEmphasized)
                 Text("GPIO 48 · RGB", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Switch(ledState, modifier = Modifier.testTag("led"), onCheckedChange = {

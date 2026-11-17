@@ -24,11 +24,11 @@ so after a reboot it rejoins by itself.
 
 ## Screenshots
 
-| Live camera | Auto: hot object → left motor | Manual control | Button input |
+| 1 · Find the board | 2 · Send Wi-Fi | 3 · Live camera | 4 · Motors |
 |---|---|---|---|
-| ![Connection and live thermal camera](docs/images/overview.png) | ![Motors in Auto mode, left motor vibrating](docs/images/motors_auto.png) | ![Manual mode with per-motor sliders](docs/images/motors_manual.png) | ![Push button pressed](docs/images/button_pressed.png) |
+| ![Guide screen scanning for the ESP32 over Bluetooth](docs/images/guide.png) | ![Wi-Fi name and password form](docs/images/wifi_setup.png) | ![Live thermal camera with a hot object boxed](docs/images/overview.png) | ![Auto mode, left motor vibrating](docs/images/motors_auto.png) |
 
-<sub>Captured by the end-to-end tests (`./gradlew :app:connectedDebugAndroidTest`) against the simulated ESP32, so the address reads <code>localhost</code>.</sub>
+<sub>Material 3 Expressive UI. Captured by the instrumented tests (<code>./gradlew :app:connectedDebugAndroidTest</code>); screens 3–4 run against the simulated ESP32, so the address reads <code>localhost</code>.</sub>
 
 ## Wire list
 

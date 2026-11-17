@@ -1,16 +1,20 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package dev.eliaschen.espapguider.ui.dashboard
 
 import android.os.SystemClock
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
@@ -75,16 +80,21 @@ internal fun ButtonCard(pressed: Boolean?, count: Int?) {
         trailing = { Pill(if (count == null) "No data" else if (sessionPresses == 1) "1 press" else "$sessionPresses presses", modifier = Modifier.testTag("button-count")) }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Pressed: spinning 9-sided cookie; released: circle (Material Expressive shapes).
+            val spin by animateFloatAsState(if (pressed == true) 90f else 0f, MaterialTheme.motionScheme.defaultSpatialSpec(), label = "spin")
+            val grow by animateFloatAsState(if (pressed == true) 1.12f else 1f, MaterialTheme.motionScheme.fastSpatialSpec(), label = "grow")
+            val shape = if (pressed == true) MaterialShapes.Cookie9Sided.toShape() else MaterialShapes.Circle.toShape()
             Box(
                 Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
+                    .size(64.dp)
+                    .graphicsLayer { rotationZ = spin; scaleX = grow; scaleY = grow }
+                    .clip(shape)
                     .background(dot),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     if (pressed == true) "ON" else "OFF",
-                    modifier = Modifier.testTag("button-state"),
+                    modifier = Modifier.graphicsLayer { rotationZ = -spin }.testTag("button-state"),
                     style = MaterialTheme.typography.labelLarge,
                     color = if (pressed == true) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package dev.eliaschen.espapguider.ui.dashboard
 
 import android.graphics.Bitmap
@@ -7,6 +9,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -82,11 +86,16 @@ internal fun ThermalCard(
             Modifier
                 .fillMaxWidth()
                 .aspectRatio(4f / 3f)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.large)
                 .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
-            if (frame == null || !frame.cameraOk) {
+            if (frame == null && socket != SocketState.Idle) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LoadingIndicator(color = Color.White)
+                    Text("Waiting for frames…", color = Color.White.copy(alpha = 0.7f))
+                }
+            } else if (frame == null || !frame.cameraOk) {
                 Text(
                     when {
                         frame != null -> "MLX90640 not found — check SDA (GPIO 8), SCL (GPIO 9), 3V3 and GND, then reset the ESP32"

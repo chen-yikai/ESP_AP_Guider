@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package dev.eliaschen.espapguider.ui.dashboard
 
 import androidx.compose.foundation.background
@@ -12,19 +14,44 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+
+/**
+ * Transparent top app bar over a background → transparent gradient, so content scrolling
+ * underneath fades out instead of hitting a hard edge.
+ */
+@Composable
+internal fun GradientTopBar(title: String) {
+    val bg = MaterialTheme.colorScheme.surface
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .background(Brush.verticalGradient(0f to bg, 0.55f to bg.copy(alpha = 0.92f), 1f to bg.copy(alpha = 0f)))
+    ) {
+        CenterAlignedTopAppBar(
+            title = { Text(title, style = MaterialTheme.typography.titleLargeEmphasized) },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Transparent,
+            ),
+            modifier = Modifier.padding(bottom = 20.dp),   // room for the fade below the bar
+        )
+    }
+}
 
 @Composable
 internal fun DashCard(
@@ -37,12 +64,13 @@ internal fun DashCard(
         modifier = Modifier
             .padding(horizontal = 12.dp)
             .fillMaxWidth(),
-        colors = CardDefaults.cardColors()
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f)) {
-                    Text(title, style = MaterialTheme.typography.titleMedium)
+                    Text(title, style = MaterialTheme.typography.titleMediumEmphasized)
                     if (subtitle != null) Text(
                         subtitle,
                         style = MaterialTheme.typography.bodySmall,
@@ -88,7 +116,7 @@ internal fun Pill(text: String, live: Boolean = false, color: Color? = null, mod
 internal fun Stat(label: String, value: String?, modifier: Modifier = Modifier) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        shape = RoundedCornerShape(10.dp),
+        shape = MaterialTheme.shapes.large,
         modifier = modifier
     ) {
         Column(Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {

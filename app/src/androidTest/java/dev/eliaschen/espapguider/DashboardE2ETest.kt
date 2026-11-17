@@ -103,13 +103,8 @@ class DashboardE2ETest {
         screenshot(name)
     }
 
-    private fun screenshot(name: String) {
-        val ctx = InstrumentationRegistry.getInstrumentation().targetContext
-        val dir = File(ctx.getExternalFilesDir(null), "e2e").apply { mkdirs() }
-        File(dir, "$name.png").outputStream().use {
-            rule.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it)
-        }
-    }
+    private fun screenshot(name: String) = saveScreenshot(rule, name)
+
 
     private fun goLive() {
         launch()
@@ -238,6 +233,8 @@ class DashboardE2ETest {
         launch(WifiStatus.Disconnected) { s, p -> sent = s to p }
         rule.onNodeWithText("Wi-Fi name").performTextInput("lab-wifi")
         rule.onNodeWithText("Password").performTextInput("s3cret")
+        rule.waitForIdle()
+        screenshot("wifi_setup")
         rule.onNodeWithText("Send to ESP32").performClick()
         rule.waitForIdle()
         assertEquals("lab-wifi" to "s3cret", sent)

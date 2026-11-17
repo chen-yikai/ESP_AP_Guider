@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package dev.eliaschen.espapguider.ui.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
@@ -6,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -80,7 +83,7 @@ internal fun WifiForm(onSubmit: (String, String) -> Unit, onCancel: (() -> Unit)
             modifier = Modifier.fillMaxWidth()
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { onSubmit(ssid.trim(), pass) }, enabled = ssid.isNotBlank()) {
+            Button(onClick = { onSubmit(ssid.trim(), pass) }, enabled = ssid.isNotBlank(), shapes = ButtonDefaults.shapes()) {
                 Text("Send to ESP32")
             }
             if (onCancel != null) TextButton(onClick = onCancel) { Text("Cancel") }

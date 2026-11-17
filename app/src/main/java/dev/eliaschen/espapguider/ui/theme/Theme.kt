@@ -3,7 +3,9 @@ package dev.eliaschen.espapguider.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -33,6 +35,7 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ESPAPGuiderTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -50,8 +53,10 @@ fun ESPAPGuiderTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
+    // Material 3 Expressive: springy motion scheme + expressive component defaults.
+    MaterialExpressiveTheme(
         colorScheme = colorScheme,
+        motionScheme = MotionScheme.expressive(),
         typography = Typography,
         content = content
     )
