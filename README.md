@@ -28,7 +28,7 @@ so after a reboot it rejoins by itself.
 |---|---|---|---|
 | ![Guide screen scanning for the ESP32 over Bluetooth](docs/images/guide.png) | ![Wi-Fi name and password form](docs/images/wifi_setup.png) | ![Live thermal camera with a hot object boxed](docs/images/overview.png) | ![Auto mode, left motor vibrating](docs/images/motors_auto.png) |
 
-<sub>Material 3 Expressive UI. Captured by the instrumented tests (<code>./gradlew :app:connectedDebugAndroidTest</code>); screens 3–4 run against the simulated ESP32, so the address reads <code>localhost</code>.</sub>
+<sub>Material 3 Expressive UI on a Pixel 10 (emulator). Captured by the instrumented tests (<code>./gradlew :app:connectedDebugAndroidTest</code>); screens 3–4 run against the simulated ESP32, so the address reads <code>localhost</code>.</sub>
 
 ## Wire list
 
